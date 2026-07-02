@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+langgraph>=0.2.0
+langchain-core
+langchain-community
+langchain-text-splitters
+langchain-openai
+langchain-pinecone
+youtube-transcript-api
+pypdf
+pinecone>=3.0.0
+python-dotenv
+pydantic
+openai
+python-multipart
