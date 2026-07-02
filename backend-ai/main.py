@@ -79,10 +79,11 @@ async def ingest_pdf(file: UploadFile = File(...)):
 
 
 NODE_MESSAGES = {
-    "condense": "Understanding your question...",
-    "route": "Routing your query to the right sources...",
-    "retrieve": "Retrieving relevant context...",
-    "grade": "Grading context quality...",
+    "condense":   "Understanding your question...",
+    "direct":     "Thinking...",
+    "route":      "Searching your sources...",
+    "retrieve":   "Retrieving relevant context...",
+    "grade":      "Checking relevance...",
     "synthesize": "Generating your answer...",
 }
 
@@ -110,8 +111,6 @@ def _citations_from_context(context: list[dict]) -> list[dict]:
 
 @app.post("/query")
 async def query(body: QueryRequest):
-    if not body.source_ids:
-        raise HTTPException(status_code=400, detail="Provide at least one source_id.")
 
     initial_state: AgentState = {
         "user_query": body.query,
@@ -147,8 +146,9 @@ async def query(body: QueryRequest):
 
                 elif mode == "messages":
                     msg, metadata = chunk
-                    # Only stream tokens from the answer-writing node, not router/grader calls.
-                    if metadata.get("langgraph_node") == "synthesize" and msg.content:
+                    node = metadata.get("langgraph_node")
+                    # Stream tokens from either the RAG synthesize node or the direct chat node.
+                    if node in ("synthesize", "direct") and msg.content:
                         streamed_tokens = True
                         yield sse({"type": "token", "content": msg.content})
 

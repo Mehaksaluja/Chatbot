@@ -57,6 +57,18 @@ _synthesize_prompt = ChatPromptTemplate.from_messages([
     ("human", "Question: {query}\n\nContext:\n{context}"),
 ])
 
+_direct_prompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        "You are Lumina, a helpful and knowledgeable AI assistant. "
+        "Answer the user's question conversationally and helpfully. "
+        "Format your response in clean Markdown where it improves readability "
+        "(use **bold**, bullet lists, headings when useful — but keep it natural for simple questions).",
+    ),
+    MessagesPlaceholder("history"),
+    ("human", "{query}"),
+])
+
 
 def _history_messages(state: AgentState, limit: int = 8) -> list:
     """Convert the trailing chat history into (role, content) tuples for prompts."""
@@ -127,6 +139,16 @@ def grade_and_rewrite(state: AgentState) -> AgentState:
         }
 
     return state
+
+
+def direct_answer(state: AgentState) -> AgentState:
+    """General LLM response when no sources are attached — plain conversational chat."""
+    print(f"[direct] query={state['user_query']!r}")
+    answer = (_direct_prompt | _llm | _parser).invoke({
+        "history": _history_messages(state),
+        "query": state["user_query"],
+    })
+    return {**state, "final_answer": answer}
 
 
 def synthesize_answer(state: AgentState) -> AgentState:
