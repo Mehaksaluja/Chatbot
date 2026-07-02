@@ -173,9 +173,10 @@ export default function ChatPanel({
             <div className="w-full max-w-[560px] text-center">
 
               {/* Icon */}
-              <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center mx-auto mb-6">
-                <svg className="w-4.5 h-4.5 text-[#0a0a0a]" viewBox="0 0 20 20" fill="currentColor" style={{width:18,height:18}}>
-                  <path d="M10 1L12.09 7.26L18.5 7.26L13.46 11.19L15.5 17.45L10 13.5L4.5 17.45L6.54 11.19L1.5 7.26L7.91 7.26Z"/>
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mx-auto mb-6">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:20,height:20}}>
+                  <path d="M3 8a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H9l-5 3.5V8z"/>
+                  <path d="M8 10h8M8 14h5"/>
                 </svg>
               </div>
 
@@ -288,7 +289,7 @@ export default function ChatPanel({
           </div>
 
           <p className="text-center text-[11px] text-[#222] mt-2.5">
-            Lumina may make mistakes. Verify important information.
+            AI can make mistakes. Always verify important information.
           </p>
         </div>
       </div>

@@ -120,7 +120,7 @@ export default function Sidebar({ open, chats, activeChatId, onSelectChat, onDel
 
         {/* Footer */}
         <div className="px-4 py-4 border-t border-white/[0.04]">
-          <p className="text-[11px] text-[#252525] font-medium">Lumina AI · v2.0</p>
+          <p className="text-[11px] text-[#252525] font-medium">Chatbot · v2.0</p>
         </div>
       </div>
     </aside>

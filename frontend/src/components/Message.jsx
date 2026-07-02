@@ -80,8 +80,8 @@ export default function Message({ message, isLast, onRegenerate, isLoading }) {
 
       {/* Avatar */}
       <div className="w-7 h-7 rounded-full bg-white flex-shrink-0 flex items-center justify-center mt-0.5 shadow-sm">
-        <svg viewBox="0 0 20 20" fill="currentColor" className="text-[#0a0a0a]" style={{width:12,height:12}}>
-          <path d="M10 1L12.09 7.26L18.5 7.26L13.46 11.19L15.5 17.45L10 13.5L4.5 17.45L6.54 11.19L1.5 7.26L7.91 7.26Z"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{width:13,height:13}}>
+          <path d="M3 8a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H9l-5 3.5V8z"/>
         </svg>
       </div>
 

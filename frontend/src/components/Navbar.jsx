@@ -16,11 +16,11 @@ export default function Navbar({ sidebarOpen, onToggleSidebar, onNewChat, chatTi
 
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center flex-shrink-0">
-            <svg viewBox="0 0 20 20" fill="currentColor" className="text-[#0a0a0a]" style={{width:11,height:11}}>
-              <path d="M10 1L12.09 7.26L18.5 7.26L13.46 11.19L15.5 17.45L10 13.5L4.5 17.45L6.54 11.19L1.5 7.26L7.91 7.26Z"/>
+            <svg viewBox="0 0 20 20" fill="none" stroke="#0a0a0a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{width:13,height:13}}>
+              <path d="M3 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7l-4 3V6z"/>
             </svg>
           </div>
-          <span className="text-[14px] font-semibold text-[#e8e8e8] tracking-tight">Lumina</span>
+          <span className="text-[14px] font-semibold text-[#e8e8e8] tracking-tight">Chatbot</span>
         </div>
       </div>
 
