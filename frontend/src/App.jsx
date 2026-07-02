@@ -93,7 +93,7 @@ export default function App() {
   const onRemoveSource = useCallback((id)      => patchChat((c) => ({ ...c, sources: c.sources.filter((s) => s.id !== id) })), [patchChat])
 
   return (
-    <div className="flex flex-col h-screen bg-surface-base overflow-hidden">
+    <div className="flex flex-col h-screen bg-[#0a0a0a] overflow-hidden">
       <Navbar
         sidebarOpen={sidebarOpen}
         onToggleSidebar={() => setSidebarOpen((o) => !o)}

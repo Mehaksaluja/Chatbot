@@ -2,15 +2,15 @@ import { useState, useRef, useEffect } from 'react'
 import { TrashIcon, PencilIcon } from './Icons'
 
 function groupByDate(chats) {
-  const now  = new Date()
-  const today = now.toDateString()
+  const now       = new Date()
+  const today     = now.toDateString()
   const yesterday = new Date(now - 86400000).toDateString()
-  const groups = { Today: [], Yesterday: [], Earlier: [] }
+  const groups    = { Today: [], Yesterday: [], Earlier: [] }
   for (const c of chats) {
     const d = new Date(c.createdAt).toDateString()
-    if (d === today)           groups.Today.push(c)
-    else if (d === yesterday)  groups.Yesterday.push(c)
-    else                       groups.Earlier.push(c)
+    if (d === today)          groups.Today.push(c)
+    else if (d === yesterday) groups.Yesterday.push(c)
+    else                      groups.Earlier.push(c)
   }
   return groups
 }
@@ -40,7 +40,7 @@ function ChatRow({ chat, isActive, onSelect, onDelete, onRename }) {
             if (e.key === 'Enter') commit()
             if (e.key === 'Escape') { setDraft(chat.title); setEditing(false) }
           }}
-          className="w-full bg-hover rounded-md px-2 py-1.5 text-[13px] text-[#e8e8e8] border border-white/[0.12] focus:outline-none"
+          className="w-full bg-white/[0.06] rounded-lg px-2.5 py-1.5 text-[13px] text-[#e0e0e0] border border-white/[0.1] focus:outline-none"
         />
       </div>
     )
@@ -50,30 +50,31 @@ function ChatRow({ chat, isActive, onSelect, onDelete, onRename }) {
     <button
       onClick={onSelect}
       onDoubleClick={() => setEditing(true)}
-      className={`group w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-[13px] transition-colors relative ${
+      className={`group w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-[13px] transition-all relative ${
         isActive
-          ? 'bg-raised text-[#e8e8e8]'
-          : 'text-[#666] hover:bg-[#1a1a1a] hover:text-[#b0b0b0]'
+          ? 'bg-white/[0.06] text-[#d8d8d8]'
+          : 'text-[#4a4a4a] hover:bg-white/[0.03] hover:text-[#999]'
       }`}
     >
-      <svg className="w-3.5 h-3.5 flex-shrink-0 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-3.5 h-3.5 flex-shrink-0 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
       </svg>
-      <span className="flex-1 truncate font-[450]">{chat.title}</span>
+      <span className="flex-1 truncate font-[450] leading-snug">{chat.title}</span>
 
-      <span className="absolute right-2 hidden group-hover:flex items-center gap-0.5">
+      {/* Hover actions */}
+      <span className="absolute right-2 hidden group-hover:flex items-center gap-0.5 bg-[#111] rounded-lg px-0.5">
         <span
           role="button"
           onClick={(e) => { e.stopPropagation(); setEditing(true) }}
-          className="p-1 rounded text-[#444] hover:text-[#aaa] transition-colors"
+          className="p-1 rounded text-[#333] hover:text-[#888] transition-colors"
         >
           <PencilIcon className="w-3 h-3" />
         </span>
         <span
           role="button"
           onClick={(e) => { e.stopPropagation(); onDelete() }}
-          className="p-1 rounded text-[#444] hover:text-[#e57373] transition-colors"
+          className="p-1 rounded text-[#333] hover:text-red-400/80 transition-colors"
         >
           <TrashIcon className="w-3 h-3" />
         </span>
@@ -87,17 +88,17 @@ export default function Sidebar({ open, chats, activeChatId, onSelectChat, onDel
 
   return (
     <aside
-      className="flex-shrink-0 bg-surface border-r border-line flex flex-col overflow-hidden transition-[width] duration-200"
-      style={{ width: open ? 240 : 0 }}
+      className="flex-shrink-0 bg-[#0f0f0f] border-r border-white/[0.05] flex flex-col overflow-hidden transition-[width] duration-200 ease-out"
+      style={{ width: open ? 260 : 0 }}
     >
-      <div className="w-[240px] h-full flex flex-col py-3">
+      <div className="w-[260px] h-full flex flex-col">
 
         {/* Chat list */}
-        <nav className="flex-1 overflow-y-auto px-2 space-y-4">
+        <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-5">
           {Object.entries(groups).map(([label, items]) =>
             items.length === 0 ? null : (
               <div key={label}>
-                <p className="text-[11px] font-semibold text-[#3a3a3a] uppercase tracking-widest px-3 mb-1">
+                <p className="text-[10.5px] font-semibold text-[#2a2a2a] uppercase tracking-[0.12em] px-3 mb-1.5">
                   {label}
                 </p>
                 <div className="space-y-px">
@@ -118,8 +119,8 @@ export default function Sidebar({ open, chats, activeChatId, onSelectChat, onDel
         </nav>
 
         {/* Footer */}
-        <div className="px-4 pt-3 border-t border-line mt-2">
-          <p className="text-[11px] text-[#333]">Lumina AI · v2.0</p>
+        <div className="px-4 py-4 border-t border-white/[0.04]">
+          <p className="text-[11px] text-[#252525] font-medium">Lumina AI · v2.0</p>
         </div>
       </div>
     </aside>

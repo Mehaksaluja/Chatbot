@@ -9,15 +9,15 @@ import { ArrowUpIcon, StopIcon } from './Icons'
 const YOUTUBE_RE = /^(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?\S*v=|shorts\/)|youtu\.be\/)[\w-]{6,}\S*$/
 
 const GENERAL_SUGGESTIONS = [
-  'Explain a concept simply',
-  'Help me brainstorm ideas',
-  'Write a short summary for me',
-  'What can you help me with?',
+  'Explain quantum computing simply',
+  'Help me brainstorm startup ideas',
+  'Write a professional email for me',
+  'What are you capable of?',
 ]
 
 const SOURCE_SUGGESTIONS = [
   'Summarize the key points',
-  'What are the main topics covered?',
+  'What are the main topics?',
   'List the most important takeaways',
   'Explain the core ideas simply',
 ]
@@ -26,12 +26,12 @@ export default function ChatPanel({
   messages, sources,
   onSetMessages, onSetTitle, onAddSource, onUpdateSource, onRemoveSource,
 }) {
-  const [input, setInput]       = useState('')
+  const [input, setInput]         = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
-  const [ytUrl, setYtUrl]       = useState('')
-  const [ytOpen, setYtOpen]     = useState(false)
-  const ytInputRef = useRef(null)
+  const [ytUrl, setYtUrl]         = useState('')
+  const [ytOpen, setYtOpen]       = useState(false)
+  const ytInputRef  = useRef(null)
   const bottomRef   = useRef(null)
   const textareaRef = useRef(null)
   const abortRef    = useRef(null)
@@ -47,13 +47,13 @@ export default function ChatPanel({
     const ta = textareaRef.current
     if (!ta) return
     ta.style.height = 'auto'
-    ta.style.height = Math.min(ta.scrollHeight, 180) + 'px'
+    ta.style.height = Math.min(ta.scrollHeight, 200) + 'px'
   }, [input])
   useEffect(() => () => abortRef.current?.abort(), [])
 
-  // ── Core query runner ──────────────────────────────────────
+  // ── Core query runner ────────────────────────────────────────
   const runQuery = useCallback(async (query, prior) => {
-    if (!query || isLoading || readySources.length === 0) return
+    if (!query || isLoading) return
     setIsLoading(true)
 
     const userMsg = { id: crypto.randomUUID(), role: 'user', content: query }
@@ -80,7 +80,7 @@ export default function ChatPanel({
 
     try {
       for await (const ev of streamQuery(query, readySources.map((s) => s.id), history, ctrl.signal)) {
-        if (ev.type === 'token')     { acc += ev.content; patch({ content: acc }) }
+        if (ev.type === 'token')          { acc += ev.content; patch({ content: acc }) }
         else if (ev.type === 'answer')    { acc = ev.content; patch({ content: acc }) }
         else if (ev.type === 'citations') patch({ citations: ev.citations })
         else if (ev.type === 'error')     throw new Error(ev.message)
@@ -117,7 +117,7 @@ export default function ChatPanel({
     if (text && YOUTUBE_RE.test(text)) { e.preventDefault(); addVideo(text) }
   }
 
-  // ── Drag & drop ────────────────────────────────────────────
+  // ── Drag & drop ──────────────────────────────────────────────
   const onDragEnter = (e) => {
     e.preventDefault()
     dragDepth.current += 1
@@ -137,149 +137,76 @@ export default function ChatPanel({
       .forEach((f) => addPDF(f))
   }
 
-  const isEmpty = messages.length === 0
-  const lastAsstId = [...messages].reverse().find((m) => m.role === 'assistant')?.id
+  const isEmpty     = messages.length === 0
+  const lastAsstId  = [...messages].reverse().find((m) => m.role === 'assistant')?.id
+  const suggestions = readySources.length > 0 ? SOURCE_SUGGESTIONS : GENERAL_SUGGESTIONS
 
   return (
     <main
-      className="relative flex-1 min-w-0 flex flex-col bg-[#0f0f0f] overflow-hidden"
+      className="relative flex-1 min-w-0 flex flex-col bg-[#0a0a0a] overflow-hidden"
       onDragEnter={onDragEnter}
       onDragOver={(e) => e.preventDefault()}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
-
       {/* ── Drag overlay ── */}
       {isDragging && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#0f0f0f]/80 backdrop-blur-sm">
-          <div className="border border-dashed border-[#333] rounded-2xl px-16 py-12 text-center">
-            <p className="text-[15px] font-medium text-[#ccc]">Drop PDF here</p>
-            <p className="text-[13px] text-[#555] mt-1">It will be indexed automatically</p>
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="border-2 border-dashed border-white/20 rounded-3xl px-20 py-14 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <p className="text-[15px] font-medium text-white/70">Drop your PDF here</p>
+            <p className="text-[13px] text-white/30 mt-1">It will be indexed automatically</p>
           </div>
         </div>
       )}
 
       {/* ── Messages ── */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scroll-smooth">
         {isEmpty ? (
 
-          /* ── Empty state ── */
-          <div className="h-full overflow-y-auto">
-            <div className="min-h-full flex flex-col items-center justify-center px-6 py-12 select-none">
-              <div className="w-full max-w-lg">
+          /* ── Empty / welcome state ── */
+          <div className="h-full flex flex-col items-center justify-center px-4">
+            <div className="w-full max-w-[560px] text-center">
 
-                {/* Icon + heading */}
-                <div className="text-center mb-8">
-                  <div className="w-11 h-11 rounded-2xl bg-[#161616] border border-[#222] flex items-center justify-center mx-auto mb-5">
-                    <svg className="w-5 h-5 text-[#555]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <h2 className="text-[22px] font-semibold text-[#e8e8e8] tracking-tight mb-2">
-                    What can I help you with?
-                  </h2>
-                  <p className="text-[13.5px] text-[#4a4a4a] leading-relaxed">
-                    Chat directly, or attach a PDF / YouTube video to ask questions about your content.
-                  </p>
-                </div>
+              {/* Icon */}
+              <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center mx-auto mb-6">
+                <svg className="w-4.5 h-4.5 text-[#0a0a0a]" viewBox="0 0 20 20" fill="currentColor" style={{width:18,height:18}}>
+                  <path d="M10 1L12.09 7.26L18.5 7.26L13.46 11.19L15.5 17.45L10 13.5L4.5 17.45L6.54 11.19L1.5 7.26L7.91 7.26Z"/>
+                </svg>
+              </div>
 
-                {/* Suggestions */}
-                <div className="grid grid-cols-2 gap-2 mb-8">
-                  {(readySources.length > 0 ? SOURCE_SUGGESTIONS : GENERAL_SUGGESTIONS).map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => runQuery(s, messages)}
-                      className="text-left px-3.5 py-3 rounded-xl border border-[#1e1e1e] hover:border-[#2a2a2a] hover:bg-[#141414] text-[13px] text-[#555] hover:text-[#bbb] transition-all leading-snug"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
+              <h1 className="text-[26px] font-semibold text-[#f0f0f0] tracking-tight leading-tight mb-3">
+                What can I help you with?
+              </h1>
+              <p className="text-[14px] text-[#4a4a4a] leading-relaxed mb-10">
+                Chat freely about anything, or attach a PDF or YouTube video<br />
+                to get AI answers grounded in your content.
+              </p>
 
-                {/* Add sources section */}
-                <div>
-                  <p className="text-[11px] text-[#2e2e2e] font-medium uppercase tracking-widest mb-3 text-center">
-                    Add a source
-                  </p>
-                  <div className="flex gap-2">
-                    {/* PDF */}
-                    <label className="flex-1 flex items-center gap-3 p-3.5 rounded-xl border border-[#1a1a1a] hover:border-[#272727] hover:bg-[#121212] cursor-pointer transition-all group">
-                      <div className="w-8 h-8 rounded-lg bg-[#161616] border border-[#222] flex items-center justify-center flex-shrink-0">
-                        <svg className="w-3.5 h-3.5 text-[#5a9ef8]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                            d="M9 12h6m-6 4h6M5 4h9l5 5v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/>
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 4v5h5"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-[12.5px] font-semibold text-[#888] group-hover:text-[#ccc] transition-colors leading-tight">PDF Document</p>
-                        <p className="text-[11.5px] text-[#383838] leading-tight mt-0.5">Browse or drag & drop</p>
-                      </div>
-                      <input type="file" accept=".pdf" className="hidden"
-                        onChange={(e) => { if (e.target.files[0]) addPDF(e.target.files[0]); e.target.value = '' }} />
-                    </label>
-
-                    {/* YouTube */}
-                    {ytOpen ? (
-                      <div className="flex-1 rounded-xl border border-[#1e1e1e] bg-[#111] p-3 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => { setYtOpen(false); setYtUrl('') }}
-                            className="w-5 h-5 flex items-center justify-center rounded text-[#444] hover:text-[#aaa] transition-colors flex-shrink-0"
-                          >
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
-                            </svg>
-                          </button>
-                          <p className="text-[12px] font-semibold text-[#888]">YouTube URL</p>
-                        </div>
-                        <input
-                          ref={ytInputRef}
-                          type="text"
-                          value={ytUrl}
-                          onChange={(e) => setYtUrl(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && ytUrl.trim()) { addVideo(ytUrl.trim()); setYtOpen(false); setYtUrl('') }
-                            if (e.key === 'Escape') { setYtOpen(false); setYtUrl('') }
-                          }}
-                          placeholder="https://youtube.com/watch?v=…"
-                          className="w-full bg-[#0a0a0a] border border-[#2a2a2a] focus:border-[#383838] rounded-lg px-2.5 py-1.5 text-[12px] text-[#ddd] placeholder-[#2e2e2e] focus:outline-none transition-colors"
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => { if (ytUrl.trim()) { addVideo(ytUrl.trim()); setYtOpen(false); setYtUrl('') } }}
-                          disabled={!ytUrl.trim()}
-                          className="w-full py-1.5 rounded-lg text-[12px] font-semibold bg-white text-[#0f0f0f] hover:bg-[#e8e8e8] disabled:opacity-20 disabled:cursor-not-allowed transition-all"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => { setYtOpen(true); setTimeout(() => ytInputRef.current?.focus(), 40) }}
-                        className="flex-1 flex items-center gap-3 p-3.5 rounded-xl border border-[#1a1a1a] hover:border-[#272727] hover:bg-[#121212] cursor-pointer transition-all group text-left"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-[#161616] border border-[#222] flex items-center justify-center flex-shrink-0">
-                          <svg className="w-3.5 h-3.5 text-[#ff4444]" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.54 3.5 12 3.5 12 3.5s-7.54 0-9.38.55A3.02 3.02 0 0 0 .5 6.19C0 8.04 0 12 0 12s0 3.96.5 5.81a3.02 3.02 0 0 0 2.12 2.14C4.46 20.5 12 20.5 12 20.5s7.54 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14C24 15.96 24 12 24 12s0-3.96-.5-5.81zM9.75 15.5v-7l6.5 3.5-6.5 3.5z"/>
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="text-[12.5px] font-semibold text-[#888] group-hover:text-[#ccc] transition-colors leading-tight">YouTube Video</p>
-                          <p className="text-[11.5px] text-[#383838] leading-tight mt-0.5">Paste a link</p>
-                        </div>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
+              {/* Suggestion grid */}
+              <div className="grid grid-cols-2 gap-2 text-left">
+                {suggestions.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => runQuery(s, messages)}
+                    className="group flex items-start gap-2.5 px-4 py-3.5 rounded-2xl border border-white/[0.06] hover:border-white/[0.11] hover:bg-white/[0.03] text-[13.5px] text-[#555] hover:text-[#bbb] transition-all text-left leading-snug"
+                  >
+                    <span className="mt-0.5 opacity-40 group-hover:opacity-70 transition-opacity flex-shrink-0 text-[16px] leading-none">→</span>
+                    {s}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
         ) : (
-          <div className="max-w-2xl mx-auto w-full px-5 py-8 space-y-7">
+
+          /* ── Chat messages ── */
+          <div className="max-w-[720px] mx-auto w-full px-6 py-10 space-y-8">
             {messages.map((msg) => (
               <Message
                 key={msg.id}
@@ -291,16 +218,17 @@ export default function ChatPanel({
             ))}
             <div ref={bottomRef} />
           </div>
+
         )}
       </div>
 
-      {/* ── Input ── */}
-      <div className="flex-shrink-0 px-4 pb-5 pt-2">
-        <div className="max-w-2xl mx-auto">
+      {/* ── Input area ── */}
+      <div className="flex-shrink-0 px-4 pb-6 pt-3">
+        <div className="max-w-[720px] mx-auto">
 
           {/* Source chips */}
           {sources.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-2 px-1">
+            <div className="flex flex-wrap gap-1.5 mb-3 px-0.5">
               {sources.map((s) => (
                 <SourceChip key={s.id} source={s} onRemove={onRemoveSource} />
               ))}
@@ -308,34 +236,37 @@ export default function ChatPanel({
           )}
 
           {/* Input box */}
-          <div className="bg-[#161616] border border-[#232323] rounded-2xl transition-colors focus-within:border-[#303030]">
+          <div className="relative bg-[#141414] border border-white/[0.07] rounded-2xl transition-all focus-within:border-white/[0.13] focus-within:shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
 
-            {/* Textarea */}
-            <div className="px-4 pt-3.5 pb-2">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onPaste={handlePaste}
-                rows={1}
-                placeholder={
-                  readySources.length === 0
-                    ? 'Ask anything…'
-                    : 'Ask about your sources…'
-                }
-                className="w-full bg-transparent text-[14px] text-[#e0e0e0] placeholder-[#333] focus:outline-none leading-relaxed"
-              />
-            </div>
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              rows={1}
+              placeholder={readySources.length > 0 ? 'Ask about your sources…' : 'Ask anything…'}
+              className="w-full bg-transparent text-[14.5px] text-[#e8e8e8] placeholder-[#303030] focus:outline-none leading-relaxed px-4 pt-4 pb-3 min-h-[52px] max-h-[200px] resize-none"
+            />
 
             {/* Toolbar */}
-            <div className="flex items-center justify-between px-3 pt-2 pb-2.5 border-t border-[#1e1e1e]">
-              <AttachmentMenu onAddVideo={addVideo} onAddPDF={addPDF} disabled={isLoading} />
+            <div className="flex items-center justify-between px-3 pb-3">
 
+              {/* Left: attachment */}
+              <div className="flex items-center gap-1">
+                <AttachmentMenu onAddVideo={addVideo} onAddPDF={addPDF} disabled={isLoading} />
+                <span className="text-[11.5px] text-[#2a2a2a] ml-1 hidden sm:block">
+                  {readySources.length > 0
+                    ? `${readySources.length} source${readySources.length > 1 ? 's' : ''} attached`
+                    : 'Attach PDF or YouTube'}
+                </span>
+              </div>
+
+              {/* Right: stop / send */}
               {isLoading ? (
                 <button
                   onClick={() => abortRef.current?.abort()}
-                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12.5px] font-medium text-[#888] hover:text-[#ccc] bg-[#1e1e1e] hover:bg-[#252525] border border-[#2a2a2a] transition-all"
+                  className="flex items-center gap-1.5 h-8 px-3.5 rounded-xl text-[12.5px] font-medium text-[#777] hover:text-[#ccc] bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.07] transition-all"
                 >
                   <StopIcon className="w-3 h-3" />
                   Stop
@@ -344,16 +275,20 @@ export default function ChatPanel({
                 <button
                   onClick={handleSubmit}
                   disabled={!canSend}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-all bg-white disabled:bg-[#1e1e1e] disabled:cursor-not-allowed"
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+                    canSend
+                      ? 'bg-white hover:bg-[#e8e8e8] shadow-sm'
+                      : 'bg-white/[0.05] cursor-not-allowed'
+                  }`}
                 >
-                  <ArrowUpIcon className={`w-4 h-4 ${canSend ? 'text-[#0f0f0f]' : 'text-[#333]'}`} />
+                  <ArrowUpIcon className={`w-4 h-4 ${canSend ? 'text-[#0a0a0a]' : 'text-[#303030]'}`} />
                 </button>
               )}
             </div>
           </div>
 
-          <p className="text-center text-[11px] text-[#2a2a2a] mt-2">
-            {readySources.length > 0 ? 'Answers are grounded in your sources' : 'Lumina AI · powered by GPT-4o mini'}
+          <p className="text-center text-[11px] text-[#222] mt-2.5">
+            Lumina may make mistakes. Verify important information.
           </p>
         </div>
       </div>

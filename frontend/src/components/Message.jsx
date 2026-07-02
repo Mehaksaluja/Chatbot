@@ -24,22 +24,22 @@ const mdComponents = {
 function Citations({ citations }) {
   if (!citations?.length) return null
   return (
-    <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex flex-wrap gap-1.5">
+    <div className="mt-4 pt-3 border-t border-white/[0.05] flex flex-wrap gap-1.5">
       {citations.map((c, i) =>
         c.source_type === 'video' ? (
-          <span key={i} className="inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border border-[#2a2a2a] bg-[#161616] text-[11.5px] text-[#666]">
-            <svg className="w-2.5 h-2.5 text-[#ff4444]/70" viewBox="0 0 16 16" fill="currentColor">
+          <span key={i} className="inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border border-white/[0.07] bg-white/[0.03] text-[11.5px] text-[#555] hover:text-[#888] transition-colors cursor-default">
+            <svg className="w-2.5 h-2.5 text-red-500/60" viewBox="0 0 16 16" fill="currentColor">
               <path d="M8 1C4.13 1 1 4.13 1 8s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7zm-1 10V5l5 3-5 3z"/>
             </svg>
             {c.ref}
           </span>
         ) : (
-          <span key={i} className="inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border border-[#2a2a2a] bg-[#161616] text-[11.5px] text-[#666]">
-            <svg className="w-2.5 h-2.5 text-[#5a9ef8]/70" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+          <span key={i} className="inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full border border-white/[0.07] bg-white/[0.03] text-[11.5px] text-[#555] hover:text-[#888] transition-colors cursor-default">
+            <svg className="w-2.5 h-2.5 text-blue-400/60" viewBox="0 0 16 16" fill="none" stroke="currentColor">
               <path strokeWidth="1.2" strokeLinecap="round" d="M4 4h8M4 7h8M4 10h5"/>
               <rect x="2" y="1.5" width="12" height="13" rx="1.5" strokeWidth="1.2"/>
             </svg>
-            p. {c.ref}
+            p.&nbsp;{c.ref}
           </span>
         )
       )}
@@ -54,43 +54,60 @@ export default function Message({ message, isLast, onRegenerate, isLoading }) {
 
   const copy = async () => {
     if (!message.content) return
-    try { await navigator.clipboard.writeText(message.content); setCopied(true); setTimeout(() => setCopied(false), 1500) }
-    catch { /* ignore */ }
+    try {
+      await navigator.clipboard.writeText(message.content)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch { /* ignore */ }
   }
 
-  // ── User bubble ──────────────────────────────────────────
+  // ── User message ─────────────────────────────────────────────
   if (isUser) {
     return (
       <div className="flex justify-end msg-in">
-        <p className="max-w-[72%] bg-[#222222] text-[#e8e8e8] rounded-2xl rounded-br-sm px-4 py-2.5 text-[14px] leading-relaxed whitespace-pre-wrap font-[450]">
-          {message.content}
-        </p>
+        <div className="max-w-[75%]">
+          <p className="bg-[#1c1c1c] border border-white/[0.06] text-[#e0e0e0] rounded-2xl rounded-br-md px-4 py-3 text-[14px] leading-relaxed whitespace-pre-wrap">
+            {message.content}
+          </p>
+        </div>
       </div>
     )
   }
 
-  // ── AI response ──────────────────────────────────────────
+  // ── Assistant message ────────────────────────────────────────
   return (
-    <div className="flex gap-3 msg-in group">
+    <div className="flex gap-3.5 msg-in group">
+
       {/* Avatar */}
-      <div className="w-6 h-6 rounded-full bg-white flex-shrink-0 flex items-center justify-center mt-0.5">
-        <svg className="w-3 h-3 text-[#0f0f0f]" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 1 L9.8 6.2 L15 6.2 L10.8 9.4 L12.4 14.6 L8 11.4 L3.6 14.6 L5.2 9.4 L1 6.2 L6.2 6.2 Z"/>
+      <div className="w-7 h-7 rounded-full bg-white flex-shrink-0 flex items-center justify-center mt-0.5 shadow-sm">
+        <svg viewBox="0 0 20 20" fill="currentColor" className="text-[#0a0a0a]" style={{width:12,height:12}}>
+          <path d="M10 1L12.09 7.26L18.5 7.26L13.46 11.19L15.5 17.45L10 13.5L4.5 17.45L6.54 11.19L1.5 7.26L7.91 7.26Z"/>
         </svg>
       </div>
 
-      <div className="flex-1 min-w-0 pb-1">
-        {/* Error state */}
+      <div className="flex-1 min-w-0 pt-0.5">
+
+        {/* Error */}
         {message.error ? (
-          <p className="text-[13.5px] text-[#e57373] leading-relaxed">{message.content}</p>
+          <div className="flex items-start gap-2.5 text-[13.5px] text-[#e57373] leading-relaxed">
+            <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#e57373]/70" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3.5a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4.5zm0 7a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+            </svg>
+            {message.content}
+          </div>
+
         ) : isPending ? (
           /* Loading dots */
-          <div className="flex items-center gap-1 mt-1.5">
-            {[0,140,280].map((d) => (
-              <span key={d} className="w-1.5 h-1.5 rounded-full bg-[#333] animate-bounce"
-                style={{ animationDelay: `${d}ms` }} />
+          <div className="flex items-center gap-1.5 h-6">
+            {[0, 150, 300].map((d) => (
+              <span
+                key={d}
+                className="w-1.5 h-1.5 rounded-full bg-[#2e2e2e] animate-bounce"
+                style={{ animationDelay: `${d}ms`, animationDuration: '1s' }}
+              />
             ))}
           </div>
+
         ) : (
           /* Answer */
           <div>
@@ -103,19 +120,25 @@ export default function Message({ message, isLast, onRegenerate, isLoading }) {
 
             {!message.streaming && <Citations citations={message.citations} />}
 
-            {/* Actions — visible on hover */}
+            {/* Action buttons */}
             {!message.streaming && (
-              <div className="flex items-center gap-0.5 mt-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={copy}
-                  className="flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] text-[#444] hover:text-[#aaa] hover:bg-raised transition-all">
+              <div className="flex items-center gap-0.5 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                <button
+                  onClick={copy}
+                  className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[12px] text-[#3a3a3a] hover:text-[#888] hover:bg-white/[0.04] transition-all"
+                >
                   {copied
-                    ? <><CheckIcon className="w-3.5 h-3.5 text-[#6a9955]" /><span className="text-[#6a9955]">Copied</span></>
-                    : <><CopyIcon className="w-3.5 h-3.5" /><span>Copy</span></>}
+                    ? <><CheckIcon className="w-3.5 h-3.5 text-emerald-500/70" /><span className="text-emerald-500/70">Copied</span></>
+                    : <><CopyIcon className="w-3.5 h-3.5" /><span>Copy</span></>
+                  }
                 </button>
 
                 {isLast && onRegenerate && (
-                  <button onClick={onRegenerate} disabled={isLoading}
-                    className="flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[12px] text-[#444] hover:text-[#aaa] hover:bg-raised transition-all disabled:opacity-30">
+                  <button
+                    onClick={onRegenerate}
+                    disabled={isLoading}
+                    className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg text-[12px] text-[#3a3a3a] hover:text-[#888] hover:bg-white/[0.04] transition-all disabled:opacity-30"
+                  >
                     <RefreshIcon className="w-3.5 h-3.5" />
                     <span>Regenerate</span>
                   </button>

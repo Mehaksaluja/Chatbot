@@ -51,14 +51,14 @@ export default function AttachmentMenu({ onAddVideo, onAddPDF, disabled }) {
 
       {/* Menu */}
       {open && (
-        <div className="absolute bottom-[calc(100%+10px)] left-0 z-50 w-[300px] rounded-2xl border border-[#2a2a2a] bg-[#171717] shadow-[0_20px_60px_rgba(0,0,0,0.7)] overflow-hidden fade-in">
+        <div className="absolute bottom-[calc(100%+10px)] left-0 z-50 w-[300px] rounded-2xl border border-white/[0.08] bg-[#111] shadow-[0_24px_64px_rgba(0,0,0,0.8),0_1px_0_rgba(255,255,255,0.04)_inset] overflow-hidden fade-in">
 
           {mode === null ? (
             <>
               {/* Header */}
-              <div className="px-4 pt-4 pb-3 border-b border-[#222]">
-                <p className="text-[11px] font-semibold text-[#444] uppercase tracking-[0.1em]">Add a source</p>
-                <p className="text-[12.5px] text-[#666] mt-0.5">Choose what to attach to this chat</p>
+              <div className="px-4 pt-4 pb-3 border-b border-white/[0.05]">
+                <p className="text-[11px] font-semibold text-[#333] uppercase tracking-[0.1em]">Add a source</p>
+                <p className="text-[12.5px] text-[#555] mt-0.5">Choose what to attach to this chat</p>
               </div>
 
               {/* Options */}
@@ -101,7 +101,7 @@ export default function AttachmentMenu({ onAddVideo, onAddPDF, disabled }) {
 
               {/* Footer note */}
               <div className="px-4 pb-3 pt-1">
-                <p className="text-[11.5px] text-[#333]">Answers will be grounded strictly in the attached sources.</p>
+                <p className="text-[11.5px] text-[#2e2e2e]">Answers will be grounded strictly in the attached sources.</p>
               </div>
             </>
           ) : (
@@ -134,7 +134,7 @@ export default function AttachmentMenu({ onAddVideo, onAddPDF, disabled }) {
                     onChange={(e) => setUrl(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && submit()}
                     placeholder="https://youtube.com/watch?v=…"
-                    className="w-full bg-[#111] border border-[#2a2a2a] focus:border-[#3a3a3a] rounded-xl pl-10 pr-3 py-2.5 text-[13px] text-[#ddd] placeholder-[#333] focus:outline-none transition-colors"
+                    className="w-full bg-[#0a0a0a] border border-white/[0.08] focus:border-white/[0.15] rounded-xl pl-10 pr-3 py-2.5 text-[13px] text-[#ddd] placeholder-[#2a2a2a] focus:outline-none transition-colors"
                   />
                 </div>
 
